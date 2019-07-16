@@ -4,7 +4,9 @@
 
 ## recommend using the sf method, grid easier to handle
 ## this code takes a shapefile and converts that into a grid to be used in VAST to create your own extrapolation grid
-## output: 
+## input: minimum is shapefile that covers region of observations with latitude and longitudes of strata/regions
+## output: a single data frame with columns (Lat, Lon, area of each grid cell (row)) 
+
 ## generate raster from shapefile
 library(sp) #version sp_1.3-1    
 library(maps) #version maps_3.3.0
@@ -69,7 +71,9 @@ grid_spatial_2@data <- over(grid_spatial,strata1)
 grid1 <- spTransform(grid_spatial_2, crs1)
 grid1 <- as.data.frame(grid1)
 grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1000*CELL_SIZE/1000),REGION))#1:nrow(grid1)
-grid2 <- subset(grid2,!is.na(REGION))
+grid2 <- subset(grid2,!is.na(REGION)) #this is to filter out the grid that does not overlap with your region. REGION can be
+                                      #replaced by whatever your shapefile@data identifier is for your areas/stratas/regions that contain 
+                                      #observations
 
 #write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
 #be careful of saving cvs's now, the new change of R over to tibble creates an extra column of numbers when you use write.csv(),
