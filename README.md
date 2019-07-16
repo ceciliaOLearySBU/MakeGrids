@@ -1,2 +1,2 @@
 # MakeGrids
-makes grids from existing lat/lon observation data for VAST
+makes grids from shapefile with lat/lon data for VAST
