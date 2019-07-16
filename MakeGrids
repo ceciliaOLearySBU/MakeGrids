@@ -25,7 +25,7 @@ strata <- spTransform(strata, CRS("+proj=longlat +lat_0=90 +lon_0=180 +x_0=0 +y_
 
 plot(strata,axes=T)
 strata@data
-  
+
 lon <- sum(bbox(strata)[1,])/2
 utmzone <- floor((lon + 180) / 6) + 1 #convert decimal degrees to utm zone
 
@@ -68,13 +68,13 @@ plot(grid, axes = TRUE, add = TRUE, col = "red")
 grid_spatial <- as(grid, "Spatial") #convert grid to Spatial Points
 grid_spatial_2 <- as(grid_spatial, "SpatialPointsDataFrame") #convert Spatial Points to SpatialPointsDataFrame
 grid_spatial_2@data <- over(grid_spatial,strata1) #combine shapefile data (strata1) with Spatial Points (grid_spatial) & place in SpatialPointsDataFrame data 
-                                                  # (this provides you with your REGION (strata) identifier in your data frame) 
+# (this provides you with your REGION (strata) identifier in your data frame) 
 grid1 <- spTransform(grid_spatial_2, crs1) #put grid in correct CRS
 grid1 <- as.data.frame(grid1) #confirm it's still a data frame
-grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1000*CELL_SIZE/1000),REGION))#1:nrow(grid1)
+grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1000*CELL_SIZE/1000),REGION,1:nrow(grid1)))#1:nrow(grid1)
 grid2 <- subset(grid2,!is.na(REGION)) #this is to filter out the grid that does not overlap with your region. REGION can be
-                                      #replaced by whatever your shapefile@data identifier is for your areas/stratas/regions that contain 
-                                      #observations
+#replaced by whatever your shapefile@data identifier is for your areas/stratas/regions that contain 
+#observations
 
 #write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
 #be careful of saving cvs's now, the new change of R over to tibble creates an extra column of numbers when you use write.csv(),
