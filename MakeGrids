@@ -2,6 +2,7 @@
 ## Cecilia O'Leary
 ## 16 July 2019
 
+## recommend using the sf method, grid easier to handle
 ## this code takes a shapefile and converts that into a grid to be used in VAST to create your own extrapolation grid
 ## output: 
 ## generate raster from shapefile
@@ -36,17 +37,18 @@ strata1 <- spTransform(strata, crs2) #convert strata to utm
 plot(strata1,axes=T)
 
 ##sp method
+#########################
 #box <- strata1@bbox
 #box[,1] <- floor(box[,1]/2000)*2000
 #box[,2] <- ceiling(box[,2]/2000)*2000
-#grid <- expand.grid(X=seq(box[1,1],box[1,2],by=40000), Y=seq(box[2,1],box[2,2],by=40000)) # 300km by 300km grid
+#grid <- expand.grid(X=seq(box[1,1],box[1,2],by=4000), Y=seq(box[2,1],box[2,2],by=4000)) # 4km by 4km grid
 #grid_2 <- SpatialPointsDataFrame(grid[,c("X","Y")],grid[,1:2])
 #proj4string(grid_2) <- crs2
 #grid_2@data <- over(grid_3,strata1) #getting the value of the polygons at each of the points from the grid 
 #grid_2 <- subset(grid_2,!is.na(REGION))
 #grid1 <- spTransform(grid_2, crs1)
 #grid1 <- as.data.frame(grid1)
-#grid2 <- with(grid1,data.frame(Lat=Y,Lon=X,Area_km2=400,REGION))
+#grid2 <- with(grid1,data.frame(Lat=Y,Lon=X,Area_km2=16,REGION))
 #with(grid2,plot(Lon,Lat,col=factor(REGION)))
 #plot(grid,cex=0.1, add = TRUE)
 #plot(grid_2,cex=15,col=2,pch=1,add=T)
@@ -70,7 +72,8 @@ grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1
 grid2 <- subset(grid2,!is.na(REGION))
 
 #write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
-#be careful of cvs's now, the new change of R over to tibble creates an extra column of numbers when you use write.csv()
+#be careful of saving cvs's now, the new change of R over to tibble creates an extra column of numbers when you use write.csv(),
+#i assume the package is deprecated for base R but there's no notification
 saveRDS(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/grid2.rds"))
 
 #output: a single data frame with columns, Lat, Lon, and then multiple columns for the area of each grid cell (row) in each individual survey shape file.
