@@ -58,18 +58,19 @@ plot(strata1,axes=T)
 #write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
 
 
-CELL_SIZE = 10000 #size of grid in m (if working in UTM)
+CELL_SIZE = 10000 #size of grid in meters (if working in UTM)
 #####sf method###########
 #########################
-st_bbox(strata1)
-grid <- st_make_grid(strata1,cellsize = CELL_SIZE, what = "centers") #cellsize in meters
+st_bbox(strata1) #get bounding box info
+grid <- st_make_grid(strata1,cellsize = CELL_SIZE, what = "centers") #cellsize in meters, creates grid using sf() package
 plot(strata1,axes=T)
 plot(grid, axes = TRUE, add = TRUE, col = "red")
-grid_spatial <- as(grid, "Spatial")
-grid_spatial_2 <- as(grid_spatial, "SpatialPointsDataFrame")
-grid_spatial_2@data <- over(grid_spatial,strata1)
-grid1 <- spTransform(grid_spatial_2, crs1)
-grid1 <- as.data.frame(grid1)
+grid_spatial <- as(grid, "Spatial") #convert grid to Spatial Points
+grid_spatial_2 <- as(grid_spatial, "SpatialPointsDataFrame") #convert Spatial Points to SpatialPointsDataFrame
+grid_spatial_2@data <- over(grid_spatial,strata1) #combine shapefile data (strata1) with Spatial Points (grid_spatial) & place in SpatialPointsDataFrame data 
+                                                  # (this provides you with your REGION (strata) identifier in your data frame) 
+grid1 <- spTransform(grid_spatial_2, crs1) #put grid in correct CRS
+grid1 <- as.data.frame(grid1) #confirm it's still a data frame
 grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1000*CELL_SIZE/1000),REGION))#1:nrow(grid1)
 grid2 <- subset(grid2,!is.na(REGION)) #this is to filter out the grid that does not overlap with your region. REGION can be
                                       #replaced by whatever your shapefile@data identifier is for your areas/stratas/regions that contain 
