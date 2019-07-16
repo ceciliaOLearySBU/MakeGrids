@@ -1,11 +1,16 @@
+## this code was created in R version 3.6.0 
+## Cecilia O'Leary
+## 16 July 2019
+
+## this code takes a shapefile and converts that into a grid to be used in VAST to create your own extrapolation grid
+## output: 
 ## generate raster from shapefile
-library(sp)
-library(maps)
-library(mapdata)
-library(rgdal)
-library(raster)
-library(sf)
-library(rgdal)
+library(sp) #version sp_1.3-1    
+library(maps) #version maps_3.3.0
+library(mapdata) #version mapdata_2.3.0
+library(raster) #version  raster_2.8-19
+library(sf) #version sf_0.7-4
+library(rgdal) #version rgdal_1.4-3
 
 getwd()
 working_directory <- getwd()
@@ -65,6 +70,7 @@ grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1
 grid2 <- subset(grid2,!is.na(REGION))
 
 #write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
+#be careful of cvs's now, the new change of R over to tibble creates an extra column of numbers when you use write.csv()
 saveRDS(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/grid2.rds"))
 
 #output: a single data frame with columns, Lat, Lon, and then multiple columns for the area of each grid cell (row) in each individual survey shape file.
