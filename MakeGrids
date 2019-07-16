@@ -1,0 +1,70 @@
+## generate raster from shapefile
+library(sp)
+library(maps)
+library(mapdata)
+library(rgdal)
+library(raster)
+library(sf)
+library(rgdal)
+
+getwd()
+working_directory <- getwd()
+
+#load shapefile
+strata <- readOGR(paste0(working_directory,"/make_extrapolation_grids/WBS/regions3571.shp"), layer = "regions3571", verbose = FALSE)
+#transform shapefile into decimal degrees
+strata <- spTransform(strata, CRS("+proj=longlat +lat_0=90 +lon_0=180 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0 "))
+
+plot(strata,axes=T)
+strata@data
+  
+lon <- sum(bbox(strata)[1,])/2
+utmzone <- floor((lon + 180) / 6) + 1 #convert decimal degrees to utm zone
+
+crs1 <- strata@proj4string
+crs1 <- CRS('+proj=longlat +ellps=WGS84 +no_defs') 
+strata@proj4string <- crs1
+
+crs2 <- CRS(paste0("+proj=utm +zone=",utmzone," +ellps=WGS84 +datum=WGS84 +units=m +no_defs "))
+strata1 <- spTransform(strata, crs2) #convert strata to utm
+
+plot(strata1,axes=T)
+
+##sp method
+#box <- strata1@bbox
+#box[,1] <- floor(box[,1]/2000)*2000
+#box[,2] <- ceiling(box[,2]/2000)*2000
+#grid <- expand.grid(X=seq(box[1,1],box[1,2],by=40000), Y=seq(box[2,1],box[2,2],by=40000)) # 300km by 300km grid
+#grid_2 <- SpatialPointsDataFrame(grid[,c("X","Y")],grid[,1:2])
+#proj4string(grid_2) <- crs2
+#grid_2@data <- over(grid_3,strata1) #getting the value of the polygons at each of the points from the grid 
+#grid_2 <- subset(grid_2,!is.na(REGION))
+#grid1 <- spTransform(grid_2, crs1)
+#grid1 <- as.data.frame(grid1)
+#grid2 <- with(grid1,data.frame(Lat=Y,Lon=X,Area_km2=400,REGION))
+#with(grid2,plot(Lon,Lat,col=factor(REGION)))
+#plot(grid,cex=0.1, add = TRUE)
+#plot(grid_2,cex=15,col=2,pch=1,add=T)
+#plot(strata,add=T)
+#write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
+
+
+CELL_SIZE = 10000 #size of grid in m (if working in UTM)
+#####sf method###########
+#########################
+st_bbox(strata1)
+grid <- st_make_grid(strata1,cellsize = CELL_SIZE, what = "centers") #cellsize in meters
+plot(strata1,axes=T)
+plot(grid, axes = TRUE, add = TRUE, col = "red")
+grid_spatial <- as(grid, "Spatial")
+grid_spatial_2 <- as(grid_spatial, "SpatialPointsDataFrame")
+grid_spatial_2@data <- over(grid_spatial,strata1)
+grid1 <- spTransform(grid_spatial_2, crs1)
+grid1 <- as.data.frame(grid1)
+grid2 <- with(grid1,data.frame(Lon=coords.x1,Lat=coords.x2,Area_km2=(CELL_SIZE/1000*CELL_SIZE/1000),REGION))#1:nrow(grid1)
+grid2 <- subset(grid2,!is.na(REGION))
+
+#write.csv(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/WBS_grid.csv"))
+saveRDS(grid2, file = paste0(working_directory,"/make_extrapolation_grids/WBS/grid2.rds"))
+
+#output: a single data frame with columns, Lat, Lon, and then multiple columns for the area of each grid cell (row) in each individual survey shape file.
