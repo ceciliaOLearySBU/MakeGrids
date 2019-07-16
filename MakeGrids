@@ -38,7 +38,7 @@ strata1 <- spTransform(strata, crs2) #convert strata to utm
 
 plot(strata1,axes=T)
 
-##sp method
+#####sp method###########
 #########################
 #box <- strata1@bbox
 #box[,1] <- floor(box[,1]/2000)*2000
